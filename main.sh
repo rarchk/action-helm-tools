@@ -51,6 +51,7 @@ case "${ACTION}" in
         git fetch -a
         UPSTREAM_CHART_VERSION=$(git show origin/"${UPSTREAM_BRANCH}":"${CHART_DIR}"/Chart.yaml | yq .version)
         UPSTREAM_CHART_NAME=$(git show origin/"${UPSTREAM_BRANCH}":"${CHART_DIR}"/Chart.yaml | yq .name)
+        echo "helm fetch serverless-chartmuseum/${UPSTREAM_CHART_NAME} --version ${UPSTREAM_CHART_VERSION}"
         helm fetch serverless-chartmuseum/"${UPSTREAM_CHART_NAME}" --version "${UPSTREAM_CHART_VERSION}"
         helm template "${UPSTREAM_CHART_NAME}/${UPSTREAM_CHART_VERSION}.tgz" -f "${CHART_DIR}"/values.yaml > /tmp/upstream_values.yaml
 
