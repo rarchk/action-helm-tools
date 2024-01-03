@@ -44,6 +44,7 @@ case "${ACTION}" in
         print_title "Helm dependency build"
         helm dependency build "${CHART_DIR}"
         print_title "Computing Helm diff"
+        
         git fetch -a
 
         if [[ -f "${CHART_DIR}/Chart.yaml" ]]; then
@@ -77,27 +78,7 @@ case "${ACTION}" in
         SUCCESS=$?
         echo -e '\033[1mComputed Helm Diff\033[0m'
         printf "$OUTPUT\n"
-
-        # COMMENT STRUCTURE
-        COMMENT="#### \`Computed Helm Diff\` Output
-<details>
-<summary>Details</summary>
-
-
-\`\`\`bash
-$OUTPUT1
-\`\`\`
-
-</details>"
-        PAYLOAD=$(echo '{}' | jq --arg body "$COMMENT" '.body = $body')
-
-        COMMENTS_URL=$(cat "$GITHUB_EVENT_PATH" | jq -r .pull_request.comments_url)
-        echo "Commenting on PR $COMMENTS_URL"
-        curl --silent -X POST \
-          --header 'content-type: application/json' \
-          --header  "Authorization: token $GITHUB_TOKEN" \
-          --data "$PAYLOAD" "$COMMENTS_URL" > /dev/null
-        exit 0
+        post_github_comments $OUTPUT1
         ;;
     "package")
         print_title "Helm dependency build"
@@ -120,8 +101,8 @@ $OUTPUT1
         ;;
     "publish-chartmuseum")
         print_title "Push chart to chartmuseum"
-        helm repo add amagi-charts "${ARTIFACTORY_URL}" --username "${ARTIFACTORY_USERNAME}" --password "${ARTIFACTORY_PASSWORD}"
-        helm cm-push "${CHART_DIR}" amagi-charts || true
+        helm repo add serverless-chartmuseum "${ARTIFACTORY_URL}" --username "${ARTIFACTORY_USERNAME}" --password "${ARTIFACTORY_PASSWORD}"
+        helm cm-push "${CHART_DIR}" serverless-chartmuseum || true
         ;;
     "publish-gar")
         print_title "Push chart on OCI registry"

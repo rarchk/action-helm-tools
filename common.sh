@@ -52,11 +52,8 @@ get_chart_version(){
 
 get_helm() {
     print_title "Get helm:${HELM_VERSION}"
-    ark get helm --version "${HELM_VERSION}" --progress --quiet
+    ark get helm --version "${HELM_VERSION}" --quiet
     helm version --short -c
-    # curl -L "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" | tar xvz
-    # chmod +x linux-amd64/helm
-    # sudo mv linux-amd64/helm /usr/local/bin/helm
 }
 
 install_helm() {
@@ -120,13 +117,13 @@ get_dyff() {
 
 install_polaris() {
     print_title "Get helm:${POLARIS_VERSION}"
-    ark get polaris  --version "${POLARIS_VERSION}" --quiet --progress
+    ark get polaris  --version "${POLARIS_VERSION}" --quiet
     polaris version
 }
 
 install_yq() {
     print_title "Get yq:${YQ_VERSION}"
-    ark get yq  --version "${YQ_VERSION}" --quiet --progress
+    ark get yq  --version "${YQ_VERSION}" --quiet
     yq --version
 }
 
@@ -138,4 +135,27 @@ install_ark() {
 
 remove_ark() {
     rm -f $HOME/.arkade/bin/*
+}
+
+post_github_comments(){
+ # COMMENT STRUCTURE
+COMMENT="#### \`Computed Helm Diff\` Output
+<details>
+<summary>Details</summary>
+
+
+\`\`\`bash
+$1
+\`\`\`
+
+</details>"
+        PAYLOAD=$(echo '{}' | jq --arg body "$COMMENT" '.body = $body')
+
+        COMMENTS_URL=$(cat "$GITHUB_EVENT_PATH" | jq -r .pull_request.comments_url)
+        echo "Commenting on PR $COMMENTS_URL"
+        curl --silent -X POST \
+          --header 'content-type: application/json' \
+          --header  "Authorization: token $GITHUB_TOKEN" \
+          --data "$PAYLOAD" "$COMMENTS_URL" > /dev/null
+        exit 0
 }

@@ -12,6 +12,7 @@ _Note this action is written to specifically work with Helm repos in Artifactory
 
 - `lint` - Runs helm linter along with dependency build.
 - `diff` - Runs helm diff using templates along with dependency build.
+- `audit` - Runs audit on helm files
 - `package` - Involves helm client only and does dependency build, lint and package chart
 - `publish-artifactory` - Uses helm artifactory plugin to uploads the chart
 - `publish-chartmuseum` - Uses helm cm plugin to uploads the chart
@@ -84,7 +85,7 @@ DEBUG: # If defined will set debug in shell script.
 Never use `main` branch in your github workflows!
 
 ```yaml
-name: Helm lint, test, package and publish
+name: Helm lint, test, package, publish, audit, diff
 
 on: pull_request
 
