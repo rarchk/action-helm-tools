@@ -44,26 +44,18 @@ case "${ACTION}" in
         print_title "Helm dependency build"
         helm dependency build "${CHART_DIR}"
         print_title "Computing Helm diff"
-        
-        git fetch -a
+
+        helm repo add serverless-chartmuseum "${ARTIFACTORY_URL}" --username "${ARTIFACTORY_USERNAME}" --password "${ARTIFACTORY_PASSWORD}"
+        UPSTREAM_CHART_VERSION=$(git show origin/"${UPSTREAM_BRANCH}":"${CHART_DIR}"/Chart.yaml | yq .version)
+        UPSTREAM_CHART_NAME=$(git show origin/"${UPSTREAM_BRANCH}":"${CHART_DIR}"/Chart.yaml | yq .name)
+        helm fetch serverless-chartmuseum/"${UPSTREAM_CHART_NAME}" --version "${UPSTREAM_CHART_VERSION}"
+        helm template "${UPSTREAM_CHART_NAME}/${UPSTREAM_CHART_VERSION}.tgz" -f "${CHART_DIR}"/values.yaml > /tmp/upstream_values.yaml
 
         if [[ -f "${CHART_DIR}/Chart.yaml" ]]; then
             helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml"  > /tmp/current_values.yaml
         else
             ls "${CHART_DIR}" || true
             touch /tmp/current_values.yaml
-            printf "\x1B[31m ChartFileDoesNotExists: Will create empty template\n"
-        fi
-
-        # checkout upstream
-        echo git checkout -b upstream_branch origin/"${UPSTREAM_BRANCH}"
-        git checkout -b upstream_branch origin/"${UPSTREAM_BRANCH}"
-        if [[ -f "${CHART_DIR}/Chart.yaml" ]]; then
-            # chart does not exists
-            helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml" > /tmp/upstream_values.yaml
-        else
-            ls "${CHART_DIR}" || true
-            touch /tmp/upstream_values.yaml
             printf "\x1B[31m ChartFileDoesNotExists: Will create empty template\n"
         fi
 
