@@ -44,7 +44,7 @@ case "${ACTION}" in
         git fetch -a
 
         if [[ -f "${CHART_DIR}/Chart.yaml" ]]; then
-            helm template "${CHART_DIR}" > /tmp/current_values.yaml
+            helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml"  > /tmp/current_values.yaml
         else
             ls "${CHART_DIR}" || true
             touch /tmp/current_values.yaml
@@ -56,7 +56,7 @@ case "${ACTION}" in
         git checkout -b upstream_branch origin/"${UPSTREAM_BRANCH}"
         if [[ -f "${CHART_DIR}/Chart.yaml" ]]; then
             # chart does not exists
-            helm template "${CHART_DIR}" > /tmp/upstream_values.yaml
+            helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml" > /tmp/upstream_values.yaml
         else
             ls "${CHART_DIR}" || true
             touch /tmp/upstream_values.yaml
