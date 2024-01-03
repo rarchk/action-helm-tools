@@ -9,7 +9,7 @@ export CHART_VERSION=${CHART_VERSION:=""}
 export CHART_APP_VERSION=${CHART_APP_VERSION:=""}
 export DYFF_VERSION=${DYFF_VERSION:="1.6.0"}
 export YQ_VERSION=${YQ_VERSION:="v4.40.5"}
-export POLARIS_VERSION=${POLARIS_VERSION:="v4.40.5"}
+export POLARIS_VERSION=${POLARIS_VERSION:="8.5.3"}
 
 export GCLOUD_PROJECT_CHECK=${GCLOUD_PROJECT_CHECK:="true"}
 
@@ -119,11 +119,13 @@ get_dyff() {
 }
 
 install_polaris() {
+    print_title "Get helm:${POLARIS_VERSION}"
     ark get polaris  --version "${POLARIS_VERSION}" --quiet --progress
     polaris version
 }
 
 install_yq() {
+    print_title "Get yq:${YQ_VERSION}"
     ark get yq  --version "${YQ_VERSION}" --quiet --progress
     yq --version
 }
@@ -131,6 +133,7 @@ install_yq() {
 install_ark() {
     curl -sLS https://get.arkade.dev | sudo sh
     export PATH=$PATH:$HOME/.arkade/bin/
+    ark version
 }
 
 remove_ark() {
