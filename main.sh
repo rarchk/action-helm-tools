@@ -11,6 +11,7 @@ export SCRIPT_DIR
 source "$SCRIPT_DIR/common.sh"
 
 install_helm
+install_polaris
 install_artifactory_plugin
 install_cmpush_plugin
 get_chart_version
@@ -25,6 +26,16 @@ case "${ACTION}" in
         if [[ -f "${CHART_DIR}/linter_values.yaml" ]]; then
             # allow for the same yaml layout that is used by gruntwork-io/pre-commit helmlint.sh
             helm lint -f "${CHART_DIR}/values.yaml" -f "${CHART_DIR}/linter_values.yaml" "${CHART_DIR}"
+        else
+            helm lint "${CHART_DIR}"
+        fi
+        ;;
+    "audit")
+        print_title "Helm dependency build"
+        helm dependency build "${CHART_DIR}"
+
+        print_title "Helm audit"
+        polaris audit --helm-chart  "${CHART_DIR}" --helm-values "${CHART_DIR}/values.yaml" --format=pretty
         else
             helm lint "${CHART_DIR}"
         fi

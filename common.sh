@@ -113,3 +113,11 @@ get_dyff() {
     chmod +x dyff
     sudo mv dyff /usr/local/bin/dyff
 }
+
+install_polaris() {
+    # Note: you can also run without `sudo` and move the binary yourself
+    curl -sLS https://get.arkade.dev | sudo sh
+    arkade --help
+    ark --help  # a handy alias
+    ark get polaris
+}
