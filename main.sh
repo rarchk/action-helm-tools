@@ -48,6 +48,7 @@ case "${ACTION}" in
         helm repo add serverless-chartmuseum "${ARTIFACTORY_URL}" --username "${ARTIFACTORY_USERNAME}" --password "${ARTIFACTORY_PASSWORD}"
         echo $UPSTREAM_BRANCH
         echo "git show origin/${UPSTREAM_BRANCH}:${CHART_DIR}/Chart.yaml | yq .name"
+        git fetch -a
         UPSTREAM_CHART_VERSION=$(git show origin/"${UPSTREAM_BRANCH}":"${CHART_DIR}"/Chart.yaml | yq .version)
         UPSTREAM_CHART_NAME=$(git show origin/"${UPSTREAM_BRANCH}":"${CHART_DIR}"/Chart.yaml | yq .name)
         helm fetch serverless-chartmuseum/"${UPSTREAM_CHART_NAME}" --version "${UPSTREAM_CHART_VERSION}"
