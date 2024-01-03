@@ -36,9 +36,6 @@ case "${ACTION}" in
 
         print_title "Helm audit"
         polaris audit --helm-chart  "${CHART_DIR}" --helm-values "${CHART_DIR}/values.yaml" --format=pretty
-        else
-            helm lint "${CHART_DIR}"
-        fi
         ;;
     "diff")
         print_title "Helm dependency build"
