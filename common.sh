@@ -51,7 +51,7 @@ get_chart_version(){
 }
 
 get_helm() {
-    print_title "Get helm:${HELM_VERSION}"
+    print_title "Installing helm:${HELM_VERSION}"
     ark get helm --version "${HELM_VERSION}" --quiet
     helm version --short -c
 }
@@ -109,20 +109,20 @@ install_dyff() {
 }
 
 get_dyff() {
-    print_title "Get dyff:${DYFF_VERSION}"
+    print_title "Installing dyff:${DYFF_VERSION}"
     curl -L "https://github.com/homeport/dyff/releases/download/v${DYFF_VERSION}/dyff_${DYFF_VERSION}_linux_amd64.tar.gz" | tar xvz
     chmod +x dyff
     sudo mv dyff /usr/local/bin/dyff
 }
 
 install_polaris() {
-    print_title "Get helm:${POLARIS_VERSION}"
+    print_title "Installing helm:${POLARIS_VERSION}"
     ark get polaris  --version "${POLARIS_VERSION}" --quiet
     polaris version
 }
 
 install_yq() {
-    print_title "Get yq:${YQ_VERSION}"
+    print_title "Installing yq:${YQ_VERSION}"
     ark get yq  --version "${YQ_VERSION}" --quiet
     yq --version
 }
@@ -130,7 +130,6 @@ install_yq() {
 install_ark() {
     curl -sLS https://get.arkade.dev | sudo sh
     export PATH=$PATH:$HOME/.arkade/bin/
-    ark version
 }
 
 remove_ark() {
