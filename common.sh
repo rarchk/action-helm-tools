@@ -117,7 +117,7 @@ get_dyff() {
 install_polaris() {
     # Note: you can also run without `sudo` and move the binary yourself
     curl -sLS https://get.arkade.dev | sudo sh
-    arkade --help
-    ark --help  # a handy alias
-    ark get polaris
+    ark get polaris  --version 8.5.3 --quiet --progress
+    sudo mv /home/runner/.arkade/bin/polaris /usr/local/bin/
+    polaris version
 }
