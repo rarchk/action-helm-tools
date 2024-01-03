@@ -10,12 +10,15 @@ SCRIPT_DIR=$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}" || realpath "${BASH_S
 export SCRIPT_DIR
 source "$SCRIPT_DIR/common.sh"
 
+install_ark
 install_helm
 install_polaris
+install_yq
+install_dyff
 install_artifactory_plugin
 install_cmpush_plugin
 get_chart_version
-install_dyff
+
 
 case "${ACTION}" in
     "lint")
@@ -181,3 +184,4 @@ $OUTPUT1
 esac
 
 remove_helm
+remove_ark

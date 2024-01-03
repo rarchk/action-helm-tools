@@ -1,13 +1,15 @@
 #!/bin/bash -l
 set -eo pipefail
 
-export HELM_VERSION=${HELM_VERSION:="3.5.1"}
-export KUBECTL_VERSION=${KUBECTL_VERSION:="1.21.0"}
+export HELM_VERSION=${HELM_VERSION:="3.13.3"}
+export KUBECTL_VERSION=${KUBECTL_VERSION:="v1.28.0"}
 export HELM_ARTIFACTORY_PLUGIN_VERSION=${HELM_ARTIFACTORY_PLUGIN_VERSION:="v1.0.2"}
 export HELM_CHARTMUSEUM_PLUGIN_VERSION=${HELM_CHARTMUSEUM_PLUGIN_VERSION:="0.10.3"}
 export CHART_VERSION=${CHART_VERSION:=""}
 export CHART_APP_VERSION=${CHART_APP_VERSION:=""}
 export DYFF_VERSION=${DYFF_VERSION:="1.6.0"}
+export YQ_VERSION=${YQ_VERSION:="v4.40.5"}
+export POLARIS_VERSION=${POLARIS_VERSION:="v4.40.5"}
 
 export GCLOUD_PROJECT_CHECK=${GCLOUD_PROJECT_CHECK:="true"}
 
@@ -50,9 +52,11 @@ get_chart_version(){
 
 get_helm() {
     print_title "Get helm:${HELM_VERSION}"
-    curl -L "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" | tar xvz
-    chmod +x linux-amd64/helm
-    sudo mv linux-amd64/helm /usr/local/bin/helm
+    ark get helm --version "${HELM_VERSION}" --progress --quiet
+    helm version --short -c
+    # curl -L "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" | tar xvz
+    # chmod +x linux-amd64/helm
+    # sudo mv linux-amd64/helm /usr/local/bin/helm
 }
 
 install_helm() {
@@ -82,7 +86,7 @@ install_cmpush_plugin(){
 remove_helm(){
     helm plugin uninstall push-artifactory
     helm plugin uninstall cm-push
-    sudo rm -rf /usr/local/bin/helm
+    # sudo rm -rf /usr/local/bin/helm
 }
 
 function version {
@@ -115,9 +119,20 @@ get_dyff() {
 }
 
 install_polaris() {
-    # Note: you can also run without `sudo` and move the binary yourself
-    curl -sLS https://get.arkade.dev | sudo sh
-    ark get polaris  --version 8.5.3 --quiet --progress
-    sudo mv /home/runner/.arkade/bin/polaris /usr/local/bin/
+    ark get polaris  --version "${POLARIS_VERSION}" --quiet --progress
     polaris version
+}
+
+install_yq() {
+    ark get yq  --version "${YQ_VERSION}" --quiet --progress
+    yq --version
+}
+
+install_ark() {
+    curl -sLS https://get.arkade.dev | sudo sh
+    export PATH=$PATH:$HOME/.arkade/bin/
+}
+
+remove_ark() {
+    rm -f $HOME/.arkade/bin/*
 }
