@@ -51,7 +51,7 @@ case "${ACTION}" in
         #echo "helm fetch serverless-chartmuseum/${UPSTREAM_CHART_NAME} --version ${UPSTREAM_CHART_VERSION}"
         helm repo add serverless-chartmuseum "${ARTIFACTORY_URL}" --username "${ARTIFACTORY_USERNAME}" --password "${ARTIFACTORY_PASSWORD}"
         helm repo update serverless-chartmuseum
-        helm fetch "serverless-chartmuseum/${UPSTREAM_CHART_NAME}" --version "${UPSTREAM_CHART_VERSION} --debug 
+        helm fetch "serverless-chartmuseum/${UPSTREAM_CHART_NAME}" --version "${UPSTREAM_CHART_VERSION}" --debug 
         # echo curl  --user "${ARTIFACTORY_USERNAME}:${ARTIFACTORY_PASSWORD}" "${ARTIFACTORY_URL}/charts/${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz" --output "${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz"
         # curl  --user "${ARTIFACTORY_USERNAME}:${ARTIFACTORY_PASSWORD}" "${ARTIFACTORY_URL}/charts/${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz" --output "${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz"
         ls
