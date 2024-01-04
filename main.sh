@@ -12,14 +12,9 @@ source "$SCRIPT_DIR/common.sh"
 
 install_ark
 install_helm
-install_polaris
-install_yq
-install_dyff
 install_artifactory_plugin
 install_cmpush_plugin
 get_chart_version
-
-
 case "${ACTION}" in
     "lint")
         print_title "Helm dependency build"
@@ -34,6 +29,7 @@ case "${ACTION}" in
         fi
         ;;
     "audit")
+        install_polaris
         print_title "Helm dependency build"
         helm dependency build "${CHART_DIR}"
 
@@ -41,6 +37,8 @@ case "${ACTION}" in
         polaris audit --helm-chart  "${CHART_DIR}" --helm-values "${CHART_DIR}/values.yaml" --format=pretty
         ;;
     "diff")
+        install_yq
+        install_dyff
         print_title "Helm dependency build"
         helm dependency build "${CHART_DIR}"
         print_title "Computing Helm diff"
@@ -52,12 +50,7 @@ case "${ACTION}" in
         helm repo add serverless-chartmuseum "${ARTIFACTORY_URL}" --username "${ARTIFACTORY_USERNAME}" --password "${ARTIFACTORY_PASSWORD}"
         helm repo update serverless-chartmuseum
         helm fetch "serverless-chartmuseum/${UPSTREAM_CHART_NAME}" --version "${UPSTREAM_CHART_VERSION}" --debug 
-        # echo curl  --user "${ARTIFACTORY_USERNAME}:${ARTIFACTORY_PASSWORD}" "${ARTIFACTORY_URL}/charts/${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz" --output "${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz"
-        # curl  --user "${ARTIFACTORY_USERNAME}:${ARTIFACTORY_PASSWORD}" "${ARTIFACTORY_URL}/charts/${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz" --output "${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz"
-        ls
-        echo helm template "${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz" -f "${CHART_DIR}"/values.yaml > /tmp/upstream_values.yaml
         helm template "${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz" -f "${CHART_DIR}"/values.yaml > /tmp/upstream_values.yaml
-        echo "done"
         if [[ -f "${CHART_DIR}/Chart.yaml" ]]; then
             helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml"  > /tmp/current_values.yaml
         else
@@ -77,6 +70,7 @@ case "${ACTION}" in
         SUCCESS=$?
         echo -e '\033[1mComputed Helm Diff\033[0m'
         printf "$OUTPUT\n"
+        printf "$OUTPUT1\n"
         post_github_comments $OUTPUT1
         ;;
     "package")
