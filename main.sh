@@ -49,12 +49,12 @@ case "${ACTION}" in
         UPSTREAM_CHART_VERSION=$(git show origin/"${UPSTREAM_BRANCH}":"${CHART_DIR}"/Chart.yaml | yq .version)
         UPSTREAM_CHART_NAME=$(git show origin/"${UPSTREAM_BRANCH}":"${CHART_DIR}"/Chart.yaml | yq .name)
         #echo "helm fetch serverless-chartmuseum/${UPSTREAM_CHART_NAME} --version ${UPSTREAM_CHART_VERSION}"
-        #helm pull "${UPSTREAM_CHART_NAME}" --version "${UPSTREAM_CHART_VERSION} --debug --repo "${ARTIFACTORY_URL}"  --username "${ARTIFACTORY_USERNAME}" --password "${ARTIFACTORY_PASSWORD}""
-        echo curl  --user "${ARTIFACTORY_USERNAME}:${ARTIFACTORY_PASSWORD}" "${ARTIFACTORY_URL}/charts/${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz" --output "${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz"
-        curl  --user "${ARTIFACTORY_USERNAME}:${ARTIFACTORY_PASSWORD}" "${ARTIFACTORY_URL}/charts/${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz" --output "${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz"
+        helm pull "${UPSTREAM_CHART_NAME}" --version "${UPSTREAM_CHART_VERSION} --debug --repo "${ARTIFACTORY_URL}"  --username "${ARTIFACTORY_USERNAME}" --password "${ARTIFACTORY_PASSWORD}""
+        # echo curl  --user "${ARTIFACTORY_USERNAME}:${ARTIFACTORY_PASSWORD}" "${ARTIFACTORY_URL}/charts/${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz" --output "${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz"
+        # curl  --user "${ARTIFACTORY_USERNAME}:${ARTIFACTORY_PASSWORD}" "${ARTIFACTORY_URL}/charts/${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz" --output "${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz"
         ls
-        echo helm template "${UPSTREAM_CHART_NAME}/${UPSTREAM_CHART_VERSION}.tgz" -f "${CHART_DIR}"/values.yaml > /tmp/upstream_values.yaml
-        helm template "${UPSTREAM_CHART_NAME}/${UPSTREAM_CHART_VERSION}.tgz" -f "${CHART_DIR}"/values.yaml > /tmp/upstream_values.yaml
+        echo helm template "${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz" -f "${CHART_DIR}"/values.yaml > /tmp/upstream_values.yaml
+        helm template "${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz" -f "${CHART_DIR}"/values.yaml > /tmp/upstream_values.yaml
         echo "done"
         if [[ -f "${CHART_DIR}/Chart.yaml" ]]; then
             helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml"  > /tmp/current_values.yaml
