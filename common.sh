@@ -116,19 +116,26 @@ get_dyff() {
 }
 
 install_polaris() {
-    print_title "Installing helm:${POLARIS_VERSION}"
-    ark get polaris  --version "${POLARIS_VERSION}" --quiet
+    if ! command -v polaris; then
+        print_title "Installing helm:${POLARIS_VERSION}"
+        ark get polaris  --version "${POLARIS_VERSION}" --quiet
+    fi
     polaris version
 }
 
 install_yq() {
-    print_title "Installing yq:${YQ_VERSION}"
-    ark get yq  --version "${YQ_VERSION}" --quiet
+    if ! command -v yq; then
+        print_title "Installing yq:${YQ_VERSION}"
+        ark get yq  --version "${YQ_VERSION}" --quiet
+    fi
     yq --version
 }
 
 install_ark() {
-    curl -sLS https://get.arkade.dev | sudo sh
+    if ! command -v ark; then
+        echo "ark is missing"
+        curl -sLS https://get.arkade.dev | sudo sh
+    fi 
     export PATH=$PATH:$HOME/.arkade/bin/
 }
 
@@ -152,9 +159,17 @@ $1
 
         COMMENTS_URL=$(cat "$GITHUB_EVENT_PATH" | jq -r .pull_request.comments_url)
         echo "Commenting on PR $COMMENTS_URL"
-        curl --silent -X POST \
+        safe_exec curl --silent -X POST \
           --header 'content-type: application/json' \
           --header  "Authorization: token $GITHUB_TOKEN" \
           --data "$PAYLOAD" "$COMMENTS_URL" > /dev/null
         exit 0
+}
+
+safe_exec(){
+    start=$(date +%s)
+    echo "Computing time for $@"
+    $@
+    end=$(date +%s)
+    echo "Elapsed Time: $(($end-$start)) seconds"
 }

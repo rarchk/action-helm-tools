@@ -40,23 +40,23 @@ case "${ACTION}" in
         install_yq
         install_dyff
         print_title "Helm dependency build"
-        helm dependency build "${CHART_DIR}"
+        safe_exec helm dependency build "${CHART_DIR}"
         print_title "Computing Helm diff"
 
-        git fetch -a
+        safe_exec git fetch -a
         UPSTREAM_CHART_VERSION=$(git show origin/"${UPSTREAM_BRANCH}":"${CHART_DIR}"/Chart.yaml | yq .version)
         UPSTREAM_CHART_NAME=$(git show origin/"${UPSTREAM_BRANCH}":"${CHART_DIR}"/Chart.yaml | yq .name)
         #echo "helm fetch serverless-chartmuseum/${UPSTREAM_CHART_NAME} --version ${UPSTREAM_CHART_VERSION}"
-        helm repo add serverless-chartmuseum "${ARTIFACTORY_URL}" --username "${ARTIFACTORY_USERNAME}" --password "${ARTIFACTORY_PASSWORD}"
-        helm repo update serverless-chartmuseum
-        helm fetch "serverless-chartmuseum/${UPSTREAM_CHART_NAME}" --version "${UPSTREAM_CHART_VERSION}" --debug 
-        helm template "${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz" -f "${CHART_DIR}"/values.yaml > /tmp/upstream_values.yaml
+        safe_exec helm repo add serverless-chartmuseum "${ARTIFACTORY_URL}" --username "${ARTIFACTORY_USERNAME}" --password "${ARTIFACTORY_PASSWORD}"
+        safe_exec helm repo update serverless-chartmuseum
+        safe_exec helm fetch "serverless-chartmuseum/${UPSTREAM_CHART_NAME}" --version "${UPSTREAM_CHART_VERSION}" --debug 
+        safe_exec helm template "${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz" -f "${CHART_DIR}"/values.yaml > /tmp/upstream_values.yaml
         if [[ -f "${CHART_DIR}/Chart.yaml" ]]; then
-            helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml"  > /tmp/current_values.yaml
+            safe_exec helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml"  > /tmp/current_values.yaml
         else
-            ls "${CHART_DIR}" || true
-            touch /tmp/current_values.yaml
-            printf "\x1B[31m ChartFileDoesNotExists: Will create empty template\n"
+            safe_exec ls "${CHART_DIR}" || true
+            safe_exec touch /tmp/current_values.yaml
+            safe_exec printf "\x1B[31m ChartFileDoesNotExists: Will create empty template\n"
         fi
 
         # Compute diff between two releases
