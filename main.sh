@@ -53,8 +53,9 @@ case "${ACTION}" in
         echo curl  --user "${ARTIFACTORY_USERNAME}:${ARTIFACTORY_PASSWORD}" "${ARTIFACTORY_URL}/charts/${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz" --output "${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz"
         curl  --user "${ARTIFACTORY_USERNAME}:${ARTIFACTORY_PASSWORD}" "${ARTIFACTORY_URL}/charts/${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz" --output "${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz"
         ls
+        echo helm template "${UPSTREAM_CHART_NAME}/${UPSTREAM_CHART_VERSION}.tgz" -f "${CHART_DIR}"/values.yaml > /tmp/upstream_values.yaml
         helm template "${UPSTREAM_CHART_NAME}/${UPSTREAM_CHART_VERSION}.tgz" -f "${CHART_DIR}"/values.yaml > /tmp/upstream_values.yaml
-
+        echo "done"
         if [[ -f "${CHART_DIR}/Chart.yaml" ]]; then
             helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml"  > /tmp/current_values.yaml
         else
