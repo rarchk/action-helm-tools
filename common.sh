@@ -143,29 +143,6 @@ remove_ark() {
     rm -f $HOME/.arkade/bin/*
 }
 
-post_github_comments(){
- # COMMENT STRUCTURE
-COMMENT="#### \`Computed Helm Diff\` Output
-<details>
-<summary>Details</summary>
-
-
-\`\`\`bash
-$1
-\`\`\`
-
-</details>"
-        PAYLOAD=$(echo '{}' | jq --arg body "$COMMENT" '.body = $body')
-
-        COMMENTS_URL=$(cat "$GITHUB_EVENT_PATH" | jq -r .pull_request.comments_url)
-        echo "Commenting on PR $COMMENTS_URL"
-        safe_exec curl --silent -X POST \
-          --header 'content-type: application/json' \
-          --header  "Authorization: token $GITHUB_TOKEN" \
-          --data "$PAYLOAD" "$COMMENTS_URL" > /dev/null
-        exit 0
-}
-
 safe_exec(){
     start=$(date +%s)
     echo "Computing time for $@"

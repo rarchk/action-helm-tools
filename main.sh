@@ -60,18 +60,8 @@ case "${ACTION}" in
         fi
 
         # Compute diff between two releases
-        set +e
-        OUTPUT=$(sh -c "dyff between /tmp/upstream_values.yaml /tmp/current_values.yaml -c on" 2>&1)
-        OUTPUT1=$(sh -c "dyff between /tmp/upstream_values.yaml /tmp/current_values.yaml" 2>&1)
-        if [ $? -ge 2 ]; then
-            OUTPUT=$(sh -c "diff --color /tmp/upstream_values.yaml /tmp/current_values.yaml" 2>&1)
-            OUTPUT1=$(sh -c "diff /tmp/upstream_values.yaml /tmp/current_values.yaml" 2>&1)
-        fi
-        SUCCESS=$?
-        echo -e '\033[1mComputed Helm Diff\033[0m'
-        printf "$OUTPUT\n"
-        printf "$OUTPUT1\n"
-        post_github_comments $OUTPUT1
+        safe_exec dyff between /tmp/upstream_values.yaml /tmp/current_values.yaml -c on
+        echo "HELMDIFF=$(dyff between /tmp/upstream_values.yaml /tmp/current_values.yaml -c on)" >> $GITHUB_OUTPUT
         ;;
     "package")
         print_title "Helm dependency build"
