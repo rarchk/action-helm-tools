@@ -34,16 +34,15 @@ case "${ACTION}" in
         helm dependency build "${CHART_DIR}"
 
         print_title "Helm audit"
-        polaris audit --helm-chart  "${CHART_DIR}" --helm-values "${CHART_DIR}/values.yaml" --format=pretty
-
-        sleep 1 
-        send_github_comments "Computed Audit for ${CHART_DIR}"  "$(polaris audit --helm-chart  ${CHART_DIR} --helm-values ${CHART_DIR}/values.yaml --format=pretty)"
+        polaris audit --helm-chart  "${CHART_DIR}" --helm-values "${CHART_DIR}/values.yaml" --format=pretty --quiet
+ 
+        send_github_comments "Computed Audit for ${CHART_DIR}"  "$(helm template ${CHART_DIR} -f ${CHART_DIR}/values.yaml  | kube-score score -)"
 
         ;;
     "diff")
         install_dyff
         print_title "Helm dependency build"
-        safe_exec helm dependency build "${CHART_DIR}"
+        helm dependency build "${CHART_DIR}"
         print_title "Computing Helm diff"
 
         # Setup repo
@@ -52,14 +51,14 @@ case "${ACTION}" in
 
         # Fetch from chart
         if [[ -z "${FROM_CHART}" ]]; then
-            safe_exec touch /tmp/upstream_values.yaml
-            safe_exec printf "\x1B[31m FROM_CHART: Will create empty template\n"
+            touch /tmp/upstream_values.yaml
+            printf "\x1B[31m FROM_CHART: Will create empty template\n"
         else
-            safe_exec helm fetch "upstream-helm-repo/${CHART_NAME}" --version "${FROM_CHART}" --debug
+            helm fetch "upstream-helm-repo/${CHART_NAME}" --version "${FROM_CHART}" --debug
             if [[ -z "${OPTIONAL_VALUES}" ]]; then
-                safe_exec helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" > /tmp/upstream_values.yaml
+                helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" > /tmp/upstream_values.yaml
             else
-                safe_exec helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/upstream_values.yaml
+                helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/upstream_values.yaml
             fi
         fi
 
@@ -67,25 +66,24 @@ case "${ACTION}" in
         if [[ -z "${TO_CHART}" ]]; then
             if [[ -f "${CHART_DIR}/Chart.yaml" ]]; then
                 if [[ -z "${OPTIONAL_VALUES}" ]]; then
-                    safe_exec helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml"  > /tmp/current_values.yaml
+                    helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml"  > /tmp/current_values.yaml
                 else
-                    safe_exec helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
+                    helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
                 fi               
             else
-                safe_exec touch /tmp/current_values.yaml
-                safe_exec printf "\x1B[31m FROM_CHART: Will create empty template\n"
+                touch /tmp/current_values.yaml
+                printf "\x1B[31m FROM_CHART: Will create empty template\n"
             fi
         else
-            safe_exec helm fetch "upstream-helm-repo/${CHART_NAME}" --version "${TO_CHART}" --debug
+            helm fetch "upstream-helm-repo/${CHART_NAME}" --version "${TO_CHART}" --debug
             if [[ -z "${OPTIONAL_VALUES}" ]]; then
-                safe_exec helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml" > /tmp/current_values.yaml
+                helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml" > /tmp/current_values.yaml
             else
-                safe_exec helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
+                helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
             fi
         fi
         # Compute diff between two releases
-        safe_exec dyff between -i /tmp/upstream_values.yaml /tmp/current_values.yaml
-        sleep 1 
+        dyff between -i /tmp/upstream_values.yaml /tmp/current_values.yaml
         send_github_comments "Computed Helm Diff for ${CHART_DIR}"  "$(dyff between -i --omit-header  /tmp/upstream_values.yaml /tmp/current_values.yaml)"
 
         ;;

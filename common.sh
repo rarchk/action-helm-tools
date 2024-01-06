@@ -10,6 +10,7 @@ export CHART_APP_VERSION=${CHART_APP_VERSION:=""}
 export DYFF_VERSION=${DYFF_VERSION:="1.6.0"}
 export YQ_VERSION=${YQ_VERSION:="v4.40.5"}
 export POLARIS_VERSION=${POLARIS_VERSION:="8.5.3"}
+export KUBE_SCORE_VERSION=${KUBE_SCORE_VERSION:="1.17.0"}
 
 export GCLOUD_PROJECT_CHECK=${GCLOUD_PROJECT_CHECK:="true"}
 
@@ -117,10 +118,17 @@ get_dyff() {
 
 install_polaris() {
     if ! command -v polaris; then
-        print_title "Installing helm:${POLARIS_VERSION}"
+        print_title "Installing polaris:${POLARIS_VERSION}"
         ark get polaris  --version "${POLARIS_VERSION}" --quiet
     fi
     polaris version
+    if ! command -v kube-score; then
+        print_title "Installing kube-score:${POLARIS_VERSION}"
+        curl -L "https://github.com/zegl/kube-score/releases/download/v${KUBE_SCORE_VERSION}/kube-score_${KUBE_SCORE_VERSION}_linux_amd64.tar.tz" | tar xvz
+        chmod +x kube-score
+        sudo mv kube-score /usr/local/bin/kube-score
+    fi
+    kube-score version
 }
 
 install_yq() {
