@@ -152,8 +152,10 @@ safe_exec(){
 
 send_github_comments() {
         COMMENT="#### $1 Output
+[Action Link](https://github.com/${{github.repository}}/commit/${{github.sha}}/checks/${{github.run_id}})
 <details>
 <summary>Details</summary>
+
 $2
 </details>"
 

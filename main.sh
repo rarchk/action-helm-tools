@@ -35,6 +35,10 @@ case "${ACTION}" in
 
         print_title "Helm audit"
         polaris audit --helm-chart  "${CHART_DIR}" --helm-values "${CHART_DIR}/values.yaml" --format=pretty
+
+        sleep 1 
+        send_github_comments "Computed Audit for ${CHART_DIR}"  "$(polaris audit --helm-chart  ${CHART_DIR} --helm-values ${CHART_DIR}/values.yaml --format=pretty)"
+
         ;;
     "diff")
         install_dyff
