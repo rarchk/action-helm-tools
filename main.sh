@@ -81,7 +81,11 @@ case "${ACTION}" in
         fi
         # Compute diff between two releases
         safe_exec dyff between -i /tmp/upstream_values.yaml /tmp/current_values.yaml 
-        echo "HELMDIFF=$(dyff between -i  /tmp/upstream_values.yaml /tmp/current_values.yaml | base64)" >> $GITHUB_OUTPUT
+        # echo "HELMDIFF=$(dyff between -i  /tmp/upstream_values.yaml /tmp/current_values.yaml | base64)" >> $GITHUB_OUTPUT
+        echo "HELMDIFF<<EOF" >> $GITHUB_OUTPUT
+        echo "$(dyff between -i  /tmp/upstream_values.yaml /tmp/current_values.yaml)" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
         ;;
     "package")
         print_title "Helm dependency build"
