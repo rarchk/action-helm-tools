@@ -159,7 +159,11 @@ safe_exec(){
 }
 
 send_github_comments() {
-        COMMENT="#### $1 Output
+    if [[ -z "${2}" ]]; then
+        printf "No data passed. Skipping posting comments"
+        exit 0
+    fi
+    COMMENT="#### $1 Output
 <details>
 <summary>Details</summary>
 
