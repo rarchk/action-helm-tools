@@ -152,10 +152,11 @@ safe_exec(){
 
 send_github_comments() {
         COMMENT="#### $1 Output
-        <details>
-        <summary>Details</summary>
-        $2
-        </details>"
+<details>
+<summary>Details</summary>
+$2
+</details>"
+
         PAYLOAD=$(echo '{}' | jq --arg body "$COMMENT" '.body = $body')
         COMMENTS_URL=$(cat "$GITHUB_EVENT_PATH" | jq -r .pull_request.comments_url)
         echo "Commenting on PR $COMMENTS_URL"
