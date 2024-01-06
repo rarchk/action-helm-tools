@@ -37,28 +37,48 @@ case "${ACTION}" in
         polaris audit --helm-chart  "${CHART_DIR}" --helm-values "${CHART_DIR}/values.yaml" --format=pretty
         ;;
     "diff")
-        install_yq
         install_dyff
         print_title "Helm dependency build"
         safe_exec helm dependency build "${CHART_DIR}"
         print_title "Computing Helm diff"
 
-        safe_exec git fetch -a
-        UPSTREAM_CHART_VERSION=$(git show origin/"${UPSTREAM_BRANCH}":"${CHART_DIR}"/Chart.yaml | yq .version)
-        UPSTREAM_CHART_NAME=$(git show origin/"${UPSTREAM_BRANCH}":"${CHART_DIR}"/Chart.yaml | yq .name)
-        #echo "helm fetch serverless-chartmuseum/${UPSTREAM_CHART_NAME} --version ${UPSTREAM_CHART_VERSION}"
-        safe_exec helm repo add serverless-chartmuseum "${ARTIFACTORY_URL}" --username "${ARTIFACTORY_USERNAME}" --password "${ARTIFACTORY_PASSWORD}"
-        safe_exec helm repo update serverless-chartmuseum
-        safe_exec helm fetch "serverless-chartmuseum/${UPSTREAM_CHART_NAME}" --version "${UPSTREAM_CHART_VERSION}" --debug 
-        safe_exec helm template "${UPSTREAM_CHART_NAME}-${UPSTREAM_CHART_VERSION}.tgz" -f "${CHART_DIR}"/values.yaml > /tmp/upstream_values.yaml
-        if [[ -f "${CHART_DIR}/Chart.yaml" ]]; then
-            safe_exec helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml"  > /tmp/current_values.yaml
+        # Setup repo
+        safe_exec helm repo add upstream-helm-repo "${ARTIFACTORY_URL}" --username "${ARTIFACTORY_USERNAME}" --password "${ARTIFACTORY_PASSWORD}"
+        safe_exec helm repo update upstream-helm-repo
+
+        # Fetch from chart
+        if [[ -z "${FROM_CHART}" ]]; then
+            safe_exec touch /tmp/upstream_values.yaml
+            safe_exec printf "\x1B[31m FROM_CHART: Will create empty template\n"
         else
-            safe_exec ls "${CHART_DIR}" || true
-            safe_exec touch /tmp/current_values.yaml
-            safe_exec printf "\x1B[31m ChartFileDoesNotExists: Will create empty template\n"
+            safe_exec helm fetch "upstream-helm-repo/${CHART_NAME}" --version "${FROM_CHART}" --debug
+            if [[ -z "${OPTIONAL_VALUES}" ]]; then
+                safe_exec helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" > /tmp/upstream_values.yaml
+            else
+                safe_exec helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/upstream_values.yaml
+            fi
         fi
 
+        ## Fecth To chart
+        if [[ -z "${TO_CHART}" ]]; then
+            if [[ -f "${CHART_DIR}/Chart.yaml" ]]; then
+                if [[ -z "${OPTIONAL_VALUES}" ]]; then
+                    safe_exec helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml"  > /tmp/current_values.yaml
+                else
+                    safe_exec helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
+                fi               
+            else
+                safe_exec touch /tmp/current_values.yaml
+                safe_exec printf "\x1B[31m FROM_CHART: Will create empty template\n"
+            fi
+        else
+            safe_exec helm fetch "upstream-helm-repo/${CHART_NAME}" --version "${TO_CHART}" --debug
+            if [[ -z "${OPTIONAL_VALUES}" ]]; then
+                safe_exec helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml" > /tmp/current_values.yaml
+            else
+                safe_exec helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
+            fi
+        fi
         # Compute diff between two releases
         safe_exec dyff between /tmp/upstream_values.yaml /tmp/current_values.yaml -c on
         echo "HELMDIFF=$(dyff between /tmp/upstream_values.yaml /tmp/current_values.yaml -c on)" >> $GITHUB_OUTPUT
@@ -84,8 +104,8 @@ case "${ACTION}" in
         ;;
     "publish-chartmuseum")
         print_title "Push chart to chartmuseum"
-        helm repo add serverless-chartmuseum "${ARTIFACTORY_URL}" --username "${ARTIFACTORY_USERNAME}" --password "${ARTIFACTORY_PASSWORD}"
-        helm cm-push "${CHART_DIR}" serverless-chartmuseum || true
+        helm repo add upstream-helm-repo "${ARTIFACTORY_URL}" --username "${ARTIFACTORY_USERNAME}" --password "${ARTIFACTORY_PASSWORD}"
+        helm cm-push "${CHART_DIR}" upstream-helm-repo || true
         ;;
     "publish-gar")
         print_title "Push chart on OCI registry"
