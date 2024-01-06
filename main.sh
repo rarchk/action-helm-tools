@@ -80,12 +80,9 @@ case "${ACTION}" in
             fi
         fi
         # Compute diff between two releases
-        safe_exec dyff between -i /tmp/upstream_values.yaml /tmp/current_values.yaml 
-        # echo "HELMDIFF=$(dyff between -i  /tmp/upstream_values.yaml /tmp/current_values.yaml | base64)" >> $GITHUB_OUTPUT
-        echo "HELMDIFF<<EOF" >> $GITHUB_OUTPUT
-        echo "$(dyff between -i  /tmp/upstream_values.yaml /tmp/current_values.yaml)" >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
-        send_github_comments "Computed Helm Diff for ${CHART_DIR}"  "$(dyff between -i  /tmp/upstream_values.yaml /tmp/current_values.yaml)"
+        safe_exec dyff between -i /tmp/upstream_values.yaml /tmp/current_values.yaml
+        sleep 1 
+        send_github_comments "Computed Helm Diff for ${CHART_DIR}"  "$(dyff between -i --omit-header  /tmp/upstream_values.yaml /tmp/current_values.yaml)"
 
         ;;
     "package")
