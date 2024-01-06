@@ -145,8 +145,7 @@ remove_ark() {
 
 safe_exec(){
     start=$(date +%s)
-    echo "Computing time for $@"
     $@
     end=$(date +%s)
-    echo "Elapsed Time: $(($end-$start)) seconds"
+    echo "Elapsed time for executing $@: $(($end-$start)) seconds"
 }
