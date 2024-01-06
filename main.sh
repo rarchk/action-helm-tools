@@ -85,6 +85,7 @@ case "${ACTION}" in
         echo "HELMDIFF<<EOF" >> $GITHUB_OUTPUT
         echo "$(dyff between -i  /tmp/upstream_values.yaml /tmp/current_values.yaml)" >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
+        send_github_comments "Computed Helm Diff for ${CHART_DIR}"  "$(dyff between -i  /tmp/upstream_values.yaml /tmp/current_values.yaml)"
 
         ;;
     "package")

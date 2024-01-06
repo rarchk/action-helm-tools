@@ -149,3 +149,19 @@ safe_exec(){
     end=$(date +%s)
     echo "Elapsed time for executing $@: $(($end-$start)) seconds"
 }
+
+send_github_comments() {
+        COMMENT="#### $1 Output
+        <details>
+        <summary>Details</summary>
+        $2
+        </details>"
+        PAYLOAD=$(echo '{}' | jq --arg body "$COMMENT" '.body = $body')
+        COMMENTS_URL=$(cat "$GITHUB_EVENT_PATH" | jq -r .pull_request.comments_url)
+        echo "Commenting on PR $COMMENTS_URL"
+        curl --silent -X POST \
+          --header 'content-type: application/json' \
+          --header  "Authorization: token $GITHUB_TOKEN" \
+          --data "$PAYLOAD" "$COMMENTS_URL" > /dev/null
+        exit 0 
+}
