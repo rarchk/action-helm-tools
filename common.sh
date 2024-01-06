@@ -124,7 +124,7 @@ install_polaris() {
     polaris version
     if ! command -v kube-score; then
         print_title "Installing kube-score:${POLARIS_VERSION}"
-        curl -L "https://github.com/zegl/kube-score/releases/download/v${KUBE_SCORE_VERSION}/kube-score_${KUBE_SCORE_VERSION}_linux_amd64.tar.tz" | tar xvz
+        curl -L "https://github.com/zegl/kube-score/releases/download/v${KUBE_SCORE_VERSION}/kube-score_${KUBE_SCORE_VERSION}_linux_amd64.tar.gz" | tar xvz
         chmod +x kube-score
         sudo mv kube-score /usr/local/bin/kube-score
     fi
