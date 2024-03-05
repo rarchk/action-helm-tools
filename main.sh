@@ -14,7 +14,7 @@ install_ark
 install_helm
 install_artifactory_plugin
 install_cmpush_plugin
-get_chart_version
+#get_chart_version
 case "${ACTION}" in
     "lint")
         print_title "Helm dependency build"
