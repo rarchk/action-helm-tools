@@ -89,12 +89,7 @@ case "${ACTION}" in
             fi
         fi
         # Compute diff between two releases
-        printf "Printing upstream values\n"
-        cat /tmp/upstream_values.yaml
-
-        printf "Printing current values\n"
-        cat /tmp/current_values.yaml
-
+        echo dyff between -i /tmp/upstream_values.yaml /tmp/current_values.yaml
         dyff between -i /tmp/upstream_values.yaml /tmp/current_values.yaml
         send_github_comments "Computed Helm Diff for ${CHART_DIR}"  "$(dyff between -i --omit-header  /tmp/upstream_values.yaml /tmp/current_values.yaml)"
 
