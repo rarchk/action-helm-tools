@@ -35,14 +35,12 @@ case "${ACTION}" in
 
         print_title "Helm audit"
         polaris audit --helm-chart  "${CHART_DIR}" --helm-values "${CHART_DIR}/values.yaml" --format=pretty --quiet
- 
+
         send_github_comments "Computed Audit for ${CHART_DIR}"  "$(helm template ${CHART_DIR} -f ${CHART_DIR}/values.yaml  | kube-score score -)"
 
         ;;
     "diff")
         install_dyff
-        print_title "Helm dependency build"
-        helm dependency build "${CHART_DIR}"
         print_title "Computing Helm diff"
 
         # Setup repo
@@ -65,11 +63,13 @@ case "${ACTION}" in
         ## Fecth To chart
         if [[ -z "${TO_CHART}" ]]; then
             if [[ -f "${CHART_DIR}/Chart.yaml" ]]; then
+                print_title "Helm dependency build"
+                helm dependency build "${CHART_DIR}"
                 if [[ -z "${OPTIONAL_VALUES}" ]]; then
                     helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml"  > /tmp/current_values.yaml
                 else
                     helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
-                fi               
+                fi
             else
                 touch /tmp/current_values.yaml
                 printf "\x1B[31m FROM_CHART: Will create empty template\n"
