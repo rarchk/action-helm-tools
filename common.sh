@@ -164,9 +164,11 @@ send_github_comments() {
         exit 0
     fi
     COMMENT="#### $1 Output
-```diff
+\`\`\`diff
+
 $2
-```"
+
+\`\`\`"
 
         PAYLOAD=$(echo '{}' | jq --arg body "$COMMENT" '.body = $body')
         COMMENTS_URL=$(cat "$GITHUB_EVENT_PATH" | jq -r .pull_request.comments_url)
