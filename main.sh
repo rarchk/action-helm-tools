@@ -54,8 +54,10 @@ case "${ACTION}" in
         else
             helm fetch "upstream-helm-repo/${CHART_NAME}" --version "${FROM_CHART}" --debug
             if [[ -z "${OPTIONAL_VALUES}" ]]; then
+                echo helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml"
                 helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" > /tmp/upstream_values.yaml
             else
+                echo helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}"  
                 helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/upstream_values.yaml
             fi
         fi
@@ -66,8 +68,10 @@ case "${ACTION}" in
                 print_title "Helm dependency build"
                 helm dependency build "${CHART_DIR}"
                 if [[ -z "${OPTIONAL_VALUES}" ]]; then
+                    echo helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml" 
                     helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml"  > /tmp/current_values.yaml
                 else
+                    echo helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}"
                     helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
                 fi
             else
@@ -77,12 +81,15 @@ case "${ACTION}" in
         else
             helm fetch "upstream-helm-repo/${CHART_NAME}" --version "${TO_CHART}" --debug
             if [[ -z "${OPTIONAL_VALUES}" ]]; then
+                echo helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml"
                 helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml" > /tmp/current_values.yaml
             else
+                echo helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" 
                 helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
             fi
         fi
         # Compute diff between two releases
+        ls /tmp
         dyff between -i /tmp/upstream_values.yaml /tmp/current_values.yaml
         send_github_comments "Computed Helm Diff for ${CHART_DIR}"  "$(dyff between -i --omit-header  /tmp/upstream_values.yaml /tmp/current_values.yaml)"
 
