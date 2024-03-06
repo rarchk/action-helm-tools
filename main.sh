@@ -37,7 +37,7 @@ case "${ACTION}" in
 
         print_title "Helm audit"
         #polaris audit --helm-chart  "${CHART_DIR}" --helm-values "${CHART_DIR}/values.yaml" --format=pretty --quiet
-
+        helm template ${CHART_DIR} -f ${CHART_DIR}/values.yaml  | kube-score score --color never -
         send_github_comments "Computed Audit for ${CHART_DIR}" "bash" "$(helm template ${CHART_DIR} -f ${CHART_DIR}/values.yaml  | kube-score score --color never -)"
 
         ;;
@@ -67,9 +67,9 @@ case "${ACTION}" in
                 print_title "Helm dependency build"
                 helm dependency build "${CHART_DIR}"
                 if [[ -z "${OPTIONAL_VALUES}" ]]; then
-                    safe_exec helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml"  > /tmp/current_values.yaml
+                    helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml"  > /tmp/current_values.yaml
                 else
-                    safe_exec helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
+                    helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
                 fi
             else
                 touch /tmp/current_values.yaml
@@ -78,9 +78,9 @@ case "${ACTION}" in
         else
             helm fetch "upstream-helm-repo/${CHART_NAME}" --version "${TO_CHART}" --debug
             if [[ -z "${OPTIONAL_VALUES}" ]]; then
-                safe_exec helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml" > /tmp/current_values.yaml
+                helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml" > /tmp/current_values.yaml
             else
-                safe_exec helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
+                helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
             fi
         fi
         # Compute diff between two releases
