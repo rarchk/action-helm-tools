@@ -37,7 +37,7 @@ case "${ACTION}" in
 
         print_title "Helm audit"
         #polaris audit --helm-chart  "${CHART_DIR}" --helm-values "${CHART_DIR}/values.yaml" --format=pretty --quiet
-        helm template ${CHART_DIR} -f ${CHART_DIR}/values.yaml  | kube-score score --color never -
+        #helm template ${CHART_DIR} -f ${CHART_DIR}/values.yaml  | kube-score score --color never -
         send_github_comments "Computed Audit for ${CHART_DIR}" "bash" "$(helm template ${CHART_DIR} -f ${CHART_DIR}/values.yaml  | kube-score score --color never -)"
 
         ;;
