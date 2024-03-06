@@ -147,20 +147,22 @@ safe_exec(){
 
 send_github_comments() {
     if [[ -z "${2}" ]]; then
+        printf "No highlighting format passed"
+        exit 0
+    fi
+    if [[ -z "${3}" ]]; then
         printf "No data passed. Skipping posting comments"
         exit 0
     fi
     COMMENT="### $1 Output
 <details>
-<summary>Check out diff here</summary>
+<summary>Check out here</summary>
 
-#### Diff
-We have computed following diff
+#### $1
 
+\`\`\`$2
 
-\`\`\`diff
-
-$2
+$3
 
 \`\`\`
 
