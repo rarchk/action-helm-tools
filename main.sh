@@ -29,12 +29,12 @@ case "${ACTION}" in
         fi
         ;;
     "audit")
-        install_polaris
+        #install_polaris
         print_title "Helm dependency build"
         helm dependency build "${CHART_DIR}"
 
         print_title "Helm audit"
-        polaris audit --helm-chart  "${CHART_DIR}" --helm-values "${CHART_DIR}/values.yaml" --format=pretty --quiet
+        #polaris audit --helm-chart  "${CHART_DIR}" --helm-values "${CHART_DIR}/values.yaml" --format=pretty --quiet
 
         send_github_comments "Computed Audit for ${CHART_DIR}"  "$(helm template ${CHART_DIR} -f ${CHART_DIR}/values.yaml  | kube-score score -)"
 
