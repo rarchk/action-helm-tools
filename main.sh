@@ -18,6 +18,7 @@ install_cmpush_plugin
 case "${ACTION}" in
     "lint")
         print_title "Helm dependency build"
+        dependency_repo_add
         safe_exec helm dependency build "${CHART_DIR}"
 
         print_title "Helm Linting"
@@ -31,6 +32,7 @@ case "${ACTION}" in
     "audit")
         install_polaris
         print_title "Helm dependency build"
+        dependency_repo_add
         helm dependency build "${CHART_DIR}"
 
         print_title "Helm audit"
