@@ -146,12 +146,21 @@ send_github_comments() {
         printf "No data passed. Skipping posting comments"
         exit 0
     fi
-    COMMENT="#### $1 Output
+    COMMENT="### $1 Output
+<details>
+<summary>Check out diff here</summary>
+
+#### Diff
+We have computed following diff
+
+
 \`\`\`diff
 
 $2
 
-\`\`\`"
+\`\`\`
+
+</details>"
 
         PAYLOAD=$(echo '{}' | jq --arg body "$COMMENT" '.body = $body')
         COMMENTS_URL=$(cat "$GITHUB_EVENT_PATH" | jq -r .pull_request.comments_url)
