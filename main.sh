@@ -29,12 +29,12 @@ case "${ACTION}" in
         fi
         ;;
     "audit")
-        #install_polaris
+        install_polaris
         print_title "Helm dependency build"
         helm dependency build "${CHART_DIR}"
 
         print_title "Helm audit"
-        #polaris audit --helm-chart  "${CHART_DIR}" --helm-values "${CHART_DIR}/values.yaml" --format=pretty --quiet
+        polaris audit --helm-chart  "${CHART_DIR}" --helm-values "${CHART_DIR}/values.yaml" --format=pretty --quiet
 
         send_github_comments "Computed Audit for ${CHART_DIR}"  "$(helm template ${CHART_DIR} -f ${CHART_DIR}/values.yaml  | kube-score score -)"
 
@@ -54,11 +54,9 @@ case "${ACTION}" in
         else
             helm fetch "upstream-helm-repo/${CHART_NAME}" --version "${FROM_CHART}" --debug
             if [[ -z "${OPTIONAL_VALUES}" ]]; then
-                echo helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml"
-                helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" > /tmp/upstream_values.yaml
+                safe_exec helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" > /tmp/upstream_values.yaml
             else
-                echo helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}"  
-                helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/upstream_values.yaml
+                safe_exec helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/upstream_values.yaml
             fi
         fi
 
@@ -68,11 +66,9 @@ case "${ACTION}" in
                 print_title "Helm dependency build"
                 helm dependency build "${CHART_DIR}"
                 if [[ -z "${OPTIONAL_VALUES}" ]]; then
-                    echo helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml" 
-                    helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml"  > /tmp/current_values.yaml
+                    safe_exec helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml"  > /tmp/current_values.yaml
                 else
-                    echo helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}"
-                    helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
+                    safe_exec helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
                 fi
             else
                 touch /tmp/current_values.yaml
@@ -81,16 +77,13 @@ case "${ACTION}" in
         else
             helm fetch "upstream-helm-repo/${CHART_NAME}" --version "${TO_CHART}" --debug
             if [[ -z "${OPTIONAL_VALUES}" ]]; then
-                echo helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml"
-                helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml" > /tmp/current_values.yaml
+                safe_exec helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml" > /tmp/current_values.yaml
             else
-                echo helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" 
-                helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
+                safe_exec helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
             fi
         fi
         # Compute diff between two releases
         send_github_comments "Computed Helm Diff for ${CHART_NAME}"  "$(git diff --no-index  /tmp/upstream_values.yaml /tmp/current_values.yaml)"
-        #send_github_comments "Computed Helm Diff(diff) for ${CHART_NAME}"  "$(diff -u  /tmp/upstream_values.yaml /tmp/current_values.yaml)"
 
         ;;
     "package")
