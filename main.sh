@@ -54,9 +54,9 @@ case "${ACTION}" in
         else
             helm fetch "upstream-helm-repo/${CHART_NAME}" --version "${FROM_CHART}" --debug
             if [[ -z "${OPTIONAL_VALUES}" ]]; then
-                safe_exec helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" > /tmp/upstream_values.yaml
+                helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" > /tmp/upstream_values.yaml
             else
-                safe_exec helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/upstream_values.yaml
+                helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/upstream_values.yaml
             fi
         fi
 
