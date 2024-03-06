@@ -31,6 +31,9 @@ function helm_show(){
     [[ -n "$value" ]] && echo "$value" || echo "UNSET"
 }
 
+dependency_repo_add(){
+python3 -c "import yaml;import os; f=open('Chart.yaml','r');  p=yaml.safe_load(f.read()); print('\n'.join('helm repo add ' + 'repo' + str(idx) + ' ' + i['repository'] for idx, i in enumerate(p['dependencies']))); f.close()" | xargs -I{} sh -c "{}" || true
+}
 get_chart_version(){
     if [ -n "$CHART_VERSION" ]; then
         echo "CHART_VERSION variable is already set (value: $CHART_VERSION), will override Chart.yaml"
