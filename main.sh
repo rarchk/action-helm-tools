@@ -30,7 +30,7 @@ case "${ACTION}" in
         fi
         ;;
     "audit")
-        #install_polaris
+        install_polaris
         print_title "Helm dependency build"
         dependency_repo_add
         helm dependency build "${CHART_DIR}"
