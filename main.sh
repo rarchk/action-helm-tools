@@ -18,7 +18,7 @@ install_cmpush_plugin
 case "${ACTION}" in
     "lint")
         print_title "Helm dependency build"
-        helm dependency build "${CHART_DIR}"
+        safe_exec helm dependency build "${CHART_DIR}"
 
         print_title "Helm Linting"
         if [[ -f "${CHART_DIR}/linter_values.yaml" ]]; then
