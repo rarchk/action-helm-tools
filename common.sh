@@ -99,23 +99,6 @@ check_helm_version_gte_3_8(){
     fi
 }
 
-install_dyff() {
-    if ! command -v dyff; then
-        echo "dyff is missing"
-        get_dyff
-    elif ! [[ $(dyff version) == *${DYFF_VERSION}* ]]; then
-        echo "dyfff $(dyff version) is not desired version"
-        get_dyff
-    fi
-}
-
-get_dyff() {
-    print_title "Installing dyff:${DYFF_VERSION}"
-    curl -L "https://github.com/homeport/dyff/releases/download/v${DYFF_VERSION}/dyff_${DYFF_VERSION}_linux_amd64.tar.gz" | tar xvz
-    chmod +x dyff
-    sudo mv dyff /usr/local/bin/dyff
-}
-
 install_polaris() {
     if ! command -v polaris; then
         print_title "Installing polaris:${POLARIS_VERSION}"
