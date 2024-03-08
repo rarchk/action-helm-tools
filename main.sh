@@ -55,9 +55,9 @@ case "${ACTION}" in
         else
             helm fetch "upstream-helm-repo/${CHART_NAME}" --version "${FROM_CHART}" --debug
             if [[ -z "${OPTIONAL_VALUES}" ]]; then
-                helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" > /tmp/upstream_values.yaml
+                helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${FROM_VALUES}" > /tmp/upstream_values.yaml
             else
-                helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/upstream_values.yaml
+                helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${FROM_VALUES}" --set "${OPTIONAL_VALUES}" > /tmp/upstream_values.yaml
             fi
         fi
 
@@ -67,9 +67,9 @@ case "${ACTION}" in
                 print_title "Helm dependency build"
                 helm dependency build "${CHART_DIR}"
                 if [[ -z "${OPTIONAL_VALUES}" ]]; then
-                    helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml"  > /tmp/current_values.yaml
+                    helm template "${CHART_DIR}" -f "${TO_VALUES}"  > /tmp/current_values.yaml
                 else
-                    helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
+                    helm template "${CHART_DIR}" -f "${TO_VALUES}" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
                 fi
             else
                 touch /tmp/current_values.yaml
