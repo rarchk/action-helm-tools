@@ -86,7 +86,7 @@ case "${ACTION}" in
         fi
         # Compute diff between two releases
         #send_github_comments "Computed Helm Diff for ${CHART_NAME}" "diff" "$(git diff --no-index  /tmp/upstream_values.yaml /tmp/current_values.yaml)"
-        send_diff_comments "$(git diff --no-index  /tmp/upstream_values.yaml /tmp/current_values.yaml)" "$(git diff --no-index  ${FROM_VALUES} ${TO_VALUES})"
+        send_diff_comments "${CHART_NAME}" "$(git diff --no-index  /tmp/upstream_values.yaml /tmp/current_values.yaml)" "$(git diff --no-index  ${FROM_VALUES} ${TO_VALUES})"
 
         ;;
     "package")
