@@ -45,6 +45,7 @@ case "${ACTION}" in
         print_title "Computing Helm diff"
 
         # Setup repo
+        echo "${ARTIFACTORY_USERNAME}" --password "${ARTIFACTORY_PASSWORD}"
         safe_exec helm repo add upstream-helm-repo "${ARTIFACTORY_URL}" --username "${ARTIFACTORY_USERNAME}" --password "${ARTIFACTORY_PASSWORD}"
         safe_exec helm repo update upstream-helm-repo
 
