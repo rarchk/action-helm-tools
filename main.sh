@@ -65,6 +65,7 @@ case "${ACTION}" in
         if [[ -z "${TO_CHART}" ]]; then
             if [[ -f "${CHART_DIR}/Chart.yaml" ]]; then
                 print_title "Helm dependency build"
+                dependency_repo_add
                 helm dependency build "${CHART_DIR}"
                 if [[ -z "${OPTIONAL_VALUES}" ]]; then
                     helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml"  > /tmp/current_values.yaml
@@ -89,6 +90,7 @@ case "${ACTION}" in
         ;;
     "package")
         print_title "Helm dependency build"
+        dependency_repo_add
         helm dependency build "${CHART_DIR}"
 
         print_title "Linting"
