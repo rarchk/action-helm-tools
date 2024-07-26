@@ -102,7 +102,7 @@ case "${ACTION}" in
         fi
 
         print_title "Helm package"
-        helm package "${CHART_DIR}" --version v"${CHART_VERSION}" --app-version "${CHART_VERSION}" --destination "${RUNNER_WORKSPACE}"
+        helm package "${CHART_DIR}" --version "${CHART_VERSION}" --app-version "${CHART_VERSION}" --destination "${RUNNER_WORKSPACE}"
         ;;
     "publish-artifactory")
         print_title "Push chart to artifactory"
