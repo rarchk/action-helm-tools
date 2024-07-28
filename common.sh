@@ -33,7 +33,7 @@ function helm_show(){
 
 dependency_repo_add(){
 pip3 install pyyaml --user
-python3 -c "import yaml;import os;from contextlib import suppress;f=open('$CHART_DIR/Chart.yaml','r');  p=yaml.safe_load(f.read());suppress(KeyError): print('\n'.join('helm repo add ' + 'repo' + str(idx) + ' ' + i['repository'] for idx, i in enumerate(p['dependencies']))); f.close()" | xargs -I{} sh -c "{}" || true
+python3 -c "import yaml;import os;from contextlib import suppress;f=open('$CHART_DIR/Chart.yaml','r');  p=yaml.safe_load(f.read());with suppress(KeyError): print('\n'.join('helm repo add ' + 'repo' + str(idx) + ' ' + i['repository'] for idx, i in enumerate(p['dependencies']))); f.close()" | xargs -I{} sh -c "{}" || true
 }
 get_chart_version(){
     if [ -n "$CHART_VERSION" ]; then
