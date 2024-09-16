@@ -1,4 +1,4 @@
-#!/bin/bash
+    #!/bin/bash
 set -o errexit
 set -o nounset
 set -o pipefail
@@ -45,6 +45,7 @@ case "${ACTION}" in
         print_title "Computing Helm diff"
 
         # Setup repo
+        echo "${ARTIFACTORY_USERNAME}" --password "${ARTIFACTORY_PASSWORD}"
         safe_exec helm repo add upstream-helm-repo "${ARTIFACTORY_URL}" --username "${ARTIFACTORY_USERNAME}" --password "${ARTIFACTORY_PASSWORD}"
         safe_exec helm repo update upstream-helm-repo
 
@@ -55,9 +56,9 @@ case "${ACTION}" in
         else
             helm fetch "upstream-helm-repo/${CHART_NAME}" --version "${FROM_CHART}" --debug
             if [[ -z "${OPTIONAL_VALUES}" ]]; then
-                helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" > /tmp/upstream_values.yaml
+                helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${FROM_VALUES}" > /tmp/upstream_values.yaml
             else
-                helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/upstream_values.yaml
+                helm template "${CHART_NAME}-${FROM_CHART}.tgz" -f "${FROM_VALUES}" --set "${OPTIONAL_VALUES}" > /tmp/upstream_values.yaml
             fi
         fi
 
@@ -68,9 +69,9 @@ case "${ACTION}" in
                 dependency_repo_add
                 helm dependency build "${CHART_DIR}"
                 if [[ -z "${OPTIONAL_VALUES}" ]]; then
-                    helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml"  > /tmp/current_values.yaml
+                    helm template "${CHART_DIR}" -f "${TO_VALUES}"  > /tmp/current_values.yaml
                 else
-                    helm template "${CHART_DIR}" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
+                    helm template "${CHART_DIR}" -f "${TO_VALUES}" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
                 fi
             else
                 touch /tmp/current_values.yaml
@@ -79,13 +80,14 @@ case "${ACTION}" in
         else
             helm fetch "upstream-helm-repo/${CHART_NAME}" --version "${TO_CHART}" --debug
             if [[ -z "${OPTIONAL_VALUES}" ]]; then
-                helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml" > /tmp/current_values.yaml
+                helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${TO_VALUES}" > /tmp/current_values.yaml
             else
-                helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${CHART_DIR}/values.yaml" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
+                helm template "${CHART_NAME}-${TO_CHART}.tgz" -f "${TO_VALUES}" --set "${OPTIONAL_VALUES}" > /tmp/current_values.yaml
             fi
         fi
         # Compute diff between two releases
-        send_github_comments "Computed Helm Diff for ${CHART_NAME}" "diff" "$(git diff --no-index  /tmp/upstream_values.yaml /tmp/current_values.yaml)"
+        #send_github_comments "Computed Helm Diff for ${CHART_NAME}" "diff" "$(git diff --no-index  /tmp/upstream_values.yaml /tmp/current_values.yaml)"
+        send_diff_comments "${CHART_NAME}" "$(git diff --no-index  /tmp/upstream_values.yaml /tmp/current_values.yaml)" "$(git diff --no-index  ${FROM_VALUES} ${TO_VALUES})"
 
         ;;
     "package")

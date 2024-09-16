@@ -177,3 +177,46 @@ $3
           --data "$PAYLOAD" "$COMMENTS_URL" > /dev/null
         exit 0 
 }
+
+send_diff_comments() {
+    if [[ -z "${2}" ]]; then
+        printf "No helm diff found. Skipping"
+        exit 0
+    fi
+    COMMENT="### Helm diff output for $1
+<details>
+<summary>value diff</summary>
+
+#### $1
+
+\`\`\`diff
+
+$3
+
+\`\`\`
+
+</details>
+
+<details>
+<summary>helm diff</summary>
+
+#### $1
+
+\`\`\`diff
+
+$2
+
+\`\`\`
+
+</details>
+"
+
+        PAYLOAD=$(echo '{}' | jq --arg body "$COMMENT" '.body = $body')
+        COMMENTS_URL=$(cat "$GITHUB_EVENT_PATH" | jq -r .pull_request.comments_url)
+        echo "Commenting on PR $COMMENTS_URL"
+        curl --silent -X POST \
+          --header 'content-type: application/json' \
+          --header  "Authorization: token $GITHUB_TOKEN" \
+          --data "$PAYLOAD" "$COMMENTS_URL" > /dev/null
+        exit 0 
+}
